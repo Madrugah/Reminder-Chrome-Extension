@@ -16,13 +16,14 @@ var loadedTime = Date();
 
                 //now populate the list with all of the reminders
                 reminderList = request.allReminders.uniqKey;
-                var btn = [];
+                var btn;
                 //for each reminder, create a new text node in the list
                 for (var i = 0; i < reminderList.length; i++) {
                     var newElement = document.createElement("LI");
 
                     //also create a new delete button, one for each reminder
                     btn = document.createElement("BUTTON");
+
                     btn.appendChild(document.createTextNode('X'));
 
                     //set the new button id = to the reminder's unique timestamp
@@ -30,13 +31,17 @@ var loadedTime = Date();
 
                     //let the button be a child of the new reminder
                     newElement.appendChild(btn);
-                    newElement.appendChild(document.createTextNode(reminderList[i].msg));
+                    var newString = reminderList[i].date.split("GMT");//add part of the timestamp to the reminder
+                    newElement.appendChild(document.createTextNode(" " + reminderList[i].msg + " - " + newString[0]));
                     document.getElementById("reminders").appendChild(newElement);
                 }
+                // for(var j = 0; j<document.getElementById("reminders").childNodes.length;j++){
+                //     document.getElementById("reminders").childNodes[j].style.padding = "4px";
+                // }
                 //set a click event listener for the reminder List
                 document.getElementById("reminders").addEventListener("click", function (e) {
                     //if the target is one of the buttons, delete that child of the reminder List
-                    if (e.target && e.target.nodeName == "BUTTON") {
+                    if (e.target && (e.target.nodeName == "BUTTON" || e.target.nodeName == "I")) {
                         for(var i = 0; i < reminderList.length; i++){
                             if(reminderList[i].date == e.target.id){
                                 //remove the selected reminder from the reminderList and update the storage and list
@@ -66,11 +71,11 @@ document.addEventListener('DOMContentLoaded', function() {
         //once the submit button is pressed, grab the value from the text field and reset the value
         var newReminder = document.getElementById("reminder").value;
         var reminderText = document.getElementById("reminder");
-        reminderText.value = "";
+        reminderText.value = "Enter a Reminder:";
         console.log(newReminder);
 
         //if the newReminder is not empty add it to the list of reminders
-        if(newReminder!=""){
+        if(newReminder != "" && newReminder != "Enter a Reminder:"){
             console.log("sending message");
             var timeStamp = Date();
             chrome.runtime.sendMessage({msg: newReminder, date: timeStamp, cmd: "normal"},
@@ -94,9 +99,18 @@ document.addEventListener('DOMContentLoaded', function() {
             btn.appendChild(document.createTextNode('X'));
             btn.id = timeStamp;
 
+
             newElement.appendChild(btn);
-            newElement.appendChild(document.createTextNode(newReminder));
+            var newString = timeStamp.split("GMT");//add part of the timestamp to the reminder
+            newElement.appendChild(document.createTextNode(" " + newReminder + " - " + newString[0]));
             document.getElementById("reminders").appendChild(newElement);
+        }
+    });
+
+    document.getElementById('reminder').addEventListener('click', function() {
+        var textBox = document.getElementById('reminder');
+        if(textBox.value == "Enter a Reminder:"){
+            textBox.value = "";
         }
     });
 });
