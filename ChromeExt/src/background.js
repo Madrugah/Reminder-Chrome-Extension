@@ -35,9 +35,12 @@ chrome.runtime.onMessage.addListener(
         }
         if(request.cmd == "normal"){
             //if the message is just a new reminder, push it onto the array and sync the array with the key
+            console.log("expire Date:");
+            console.log(request);
+            console.log(request.expireDate);
 
             reminderArray.push(request);
-            console.log("reminder Array Was:" + reminderArray);
+            console.log(reminderArray);
             chrome.storage.local.set({uniqKey: reminderArray}, function () {
                 console.log('ReminderArray is now: ' + reminderArray);
             });

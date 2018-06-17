@@ -1,7 +1,8 @@
 var reminderList = [];
 
 window.onload = function() {
-var loadedTime = Date();
+    var loadedTime = Date();
+
     //onloading send a handshake to the background script
     chrome.runtime.sendMessage({msg: "handshake",cmd:"handshake", date: loadedTime},
         function (response) {
@@ -35,9 +36,7 @@ var loadedTime = Date();
                     newElement.appendChild(document.createTextNode(" " + reminderList[i].msg + " - " + newString[0]));
                     document.getElementById("reminders").appendChild(newElement);
                 }
-                // for(var j = 0; j<document.getElementById("reminders").childNodes.length;j++){
-                //     document.getElementById("reminders").childNodes[j].style.padding = "4px";
-                // }
+
                 //set a click event listener for the reminder List
                 document.getElementById("reminders").addEventListener("click", function (e) {
                     //if the target is one of the buttons, delete that child of the reminder List
@@ -70,15 +69,32 @@ document.addEventListener('DOMContentLoaded', function() {
 
         //once the submit button is pressed, grab the value from the text field and reset the value
         var newReminder = document.getElementById("reminder").value;
-        var reminderText = document.getElementById("reminder");
-        reminderText.value = "Enter a Reminder:";
-        console.log(newReminder);
+        var expirationTime = document.getElementById("expireTime").value;
+        var expDateStr = String(new Date(expirationTime));
+        var timeStamp = Date();
+        var timeDifference = Date.parse(timeStamp)-Date.parse(expDateStr);
+        //get the time that the user wants the reminder to be set for an find out if it is in the future
 
+        //ensure no fields are left invalid
+        if(newReminder == "" && expirationTime == ""){
+            alert("Enter a Note and a DateTime!");
+        }else{
+            if(newReminder == ""){
+                alert("Enter a Note!");
+            }
+            if(expirationTime == ""){
+                alert("Enter a DateTime!");
+            }
+            if(timeDifference >= 0){
+                alert("Plan a Reminder for the Future!");
+            }
+        }
         //if the newReminder is not empty add it to the list of reminders
-        if(newReminder != "" && newReminder != "Enter a Reminder:"){
+        if(newReminder != "" && expirationTime != "" && timeDifference < 0){
             console.log("sending message");
-            var timeStamp = Date();
-            chrome.runtime.sendMessage({msg: newReminder, date: timeStamp, cmd: "normal"},
+
+            //send the reminder to the background
+            chrome.runtime.sendMessage({msg: newReminder, date: timeStamp, expireDate: expDateStr, cmd: "normal"},
                 function (response) {
                     console.log("sent new reminder");
                 });
