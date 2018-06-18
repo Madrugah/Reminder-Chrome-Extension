@@ -5,7 +5,7 @@
 A solo project meant to provide a better understanding of the Chrome Javascript api and its interaction with Chrome extensions and the chrome browser.
 
 ## Functionality:
-Currently, the extension allows the user to create reminders that get stored locally with the chrome browser. The extension allows the user to delete any created reminder. User's can also set a time for the reminder. After that time has past, the reminder will be sent to a different list of all other expired reminders. It will remain there until dismissed by the user.
+Currently, the extension allows the user to create reminders that get stored locally with the chrome browser. The extension allows the user to delete any created reminder. User's can also set a time for the reminder. After that time has past, the reminder will be sent to a different list of all other expired reminders. It will remain there until dismissed by the user. Every minute the browser will check if a reminder has expired. If it has, the current page the user is on will be alerted of that reminder. This is done whether or not the popup menu is open.
 
 ## Resources:
 	Chrome Javascript API:

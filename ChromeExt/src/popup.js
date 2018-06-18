@@ -14,13 +14,21 @@ window.onload = function() {
     chrome.runtime.onMessage.addListener(
         function(request, sender, sendResponse) {
             if (request.cmd == "sendAll"){
-                //console.log(request.allReminders.uniqKey);
+                //clear both lists first
+                while (document.getElementById("reminders").firstChild) {
+                    document.getElementById("reminders").removeChild(document.getElementById("reminders").firstChild);
+                }
+                while (document.getElementById("expRems").firstChild) {
+                    document.getElementById("expRems").removeChild(document.getElementById("expRems").firstChild);
+                }
 
                 //now populate the list with all of the reminders
                 reminderList = request.allReminders;
                 expiredList = request.expiredReminders;
                 console.log(reminderList);
                 console.log(expiredList);
+
+
 
                 var btn;
                 //for each reminder, create a new text node in the list
@@ -109,7 +117,6 @@ window.onload = function() {
         }
     );
 }
-
 
 document.addEventListener('DOMContentLoaded', function() {
     //create an event listener after the DOM content has loaded to listen for when the submit button is pressed
