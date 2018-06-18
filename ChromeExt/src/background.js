@@ -1,5 +1,6 @@
 console.log("background running");
-var reminderArray=[];
+var reminderArray = [];
+var expiredArray = [];
 
 
 //receive a message from the popup
@@ -11,16 +12,61 @@ chrome.runtime.onMessage.addListener(
         if (request.cmd == "handshake" && request.msg == "handshake") {
             //if the message is a handshake, then get all of the data and send it to the popup
             reminderArray=[];
+            expiredArray=[];
             chrome.storage.local.get(null, function (items) {
-                console.log(items.uniqKey);//items contains every single Key => value match
-                for(var i=0;i<items.uniqKey.length;i++){//for each reminder push it into the reminder array
 
+                for(var i=0;i<items.uniqKey.length;i++){//for each reminder push it into the reminder array
                     reminderArray.push(items.uniqKey[i]);
                 }
+
+                if(items.uniqKey2 != undefined){
+                    for (var i = 0; i < items.uniqKey2.length; i++) {//for each expired reminder push it into the expired array
+                        expiredArray.push(items.uniqKey2[i]);
+                        console.log("AFTER INIT:");
+                        console.log(expiredArray);
+                    }
+                }
+
+                //now sort the array
+                var min;
+                var tDiff;
+
+                for(var i=0; i<reminderArray.length; i++){
+                    min=i;
+                    for(var j=i+1;j<reminderArray.length;j++){
+                        tDiff = (Date.parse(reminderArray[min].expireDate)-Date.parse(reminderArray[j].expireDate));
+                        if(tDiff>0){
+                            //find the minimum value in each cycle through the array
+                            min=j;
+                        }
+                    }
+                    //swap the minimum value with the starting indexed value
+                    var tmp = reminderArray[min];
+                    reminderArray[min] = reminderArray[i];
+                    reminderArray[i] = tmp;
+                }
+
+                //If a reminder's expireTime passes by, send it to the expired Array
+                for(var i=0; i<reminderArray.length;i++){
+                    if((Date.parse(Date())-Date.parse(reminderArray[i].expireDate)) >= 0){
+                        //cut it out of the reminderArray and put in expiredArray and re-adjust counter
+                        var removedVal = reminderArray.splice(i,1);
+                        expiredArray.push(removedVal[0]);
+                        i--;
+                    }
+                }
+
+                //and update the storage for both
+                chrome.storage.local.set({uniqKey2: expiredArray}, function () {
+
+                });
+                chrome.storage.local.set({uniqKey: reminderArray}, function () {
+
+                });
+
                 //send all of the reminders to the popup
-                chrome.runtime.sendMessage({allReminders: items,cmd: "sendAll"}, function () {
+                chrome.runtime.sendMessage({allReminders: reminderArray, expiredReminders: expiredArray, cmd: "sendAll"}, function () {
                     //send all of the reminders
-                    console.log(reminderArray);
                 });
             });
         }
@@ -33,14 +79,44 @@ chrome.runtime.onMessage.addListener(
                 console.log(reminderArray);
             });
         }
+        if(request.cmd == "deleteExp"){
+            //if the message is a delete, take the newList from the message and replace the old array with the new one
+            expiredArray = request.newExpiredList;
+            //replace the array in storage with the new one
+            chrome.storage.local.set({uniqKey2: expiredArray}, function () {
+
+            });
+        }
+        if(request.cmd == "dismissAll"){
+            //if the message is a delete, take the newList from the message and replace the old array with the new one
+            expiredArray = [];
+            //replace the array in storage with the new one
+            chrome.storage.local.set({uniqKey2: expiredArray}, function () {
+
+            });
+        }
         if(request.cmd == "normal"){
             //if the message is just a new reminder, push it onto the array and sync the array with the key
-            console.log("expire Date:");
-            console.log(request);
-            console.log(request.expireDate);
-
             reminderArray.push(request);
-            console.log(reminderArray);
+
+            //sort the array based on expireddates
+            var min;
+            var tDiff;
+            for(var i=0; i<reminderArray.length; i++){
+                min=i;
+                for(var j=i+1;j<reminderArray.length;j++){
+                    tDiff = (Date.parse(reminderArray[min].expireDate)-Date.parse(reminderArray[j].expireDate));
+                    if(tDiff>0){
+                        //find the minimum value in each cycle through the array
+                        min=j;
+                    }
+                }
+                //swap the minimum value with the starting indexed value
+                var tmp = reminderArray[min];
+                reminderArray[min] = reminderArray[i];
+                reminderArray[i] = tmp;
+            }
+
             chrome.storage.local.set({uniqKey: reminderArray}, function () {
                 console.log('ReminderArray is now: ' + reminderArray);
             });

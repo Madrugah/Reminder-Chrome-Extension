@@ -20,15 +20,21 @@
 </div>
 <hr>
 <div>
-    <u><b>Reminders:</b></u>
-    <ol id="reminders" style="list-style-type: none;border-width:1px; border-style:solid; padding-left: 0; height:100px; overflow:hidden; overflow-y:scroll;"></ol>
-    <hr>
     <u><b>Create a New Reminder:</b></u><br>
     Note:<br>
     <input type="text" id="reminder" placeholder="Enter a Reminder:"><br>
     Reminder Time:<br>
     <input type="datetime-local" id="expireTime"><br>
     <button id="submit">Add Reminder</button>
+    <hr>
+    <u><b>Reminders:</b></u>
+    <ol id="reminders" style="list-style-type: none;border-width:1px; border-style:solid; padding-left: 0; height:100px; overflow:hidden; overflow-y:scroll;"></ol>
+</div>
+<hr>
+<div>
+    <u><b>Expired Reminders:</b></u>
+    <ol id="expRems" style="list-style-type: none;border-width:1px; border-style:solid; border-color:red; padding-left: 0; height:100px; overflow:hidden; overflow-y:scroll;"></ol>
+    <button id="dismiss">Dismiss All</button>
 </div>
 
 

@@ -1,4 +1,5 @@
 var reminderList = [];
+var expiredList = [];
 
 window.onload = function() {
     var loadedTime = Date();
@@ -13,10 +14,14 @@ window.onload = function() {
     chrome.runtime.onMessage.addListener(
         function(request, sender, sendResponse) {
             if (request.cmd == "sendAll"){
-                console.log(request.allReminders.uniqKey);
+                //console.log(request.allReminders.uniqKey);
 
                 //now populate the list with all of the reminders
-                reminderList = request.allReminders.uniqKey;
+                reminderList = request.allReminders;
+                expiredList = request.expiredReminders;
+                console.log(reminderList);
+                console.log(expiredList);
+
                 var btn;
                 //for each reminder, create a new text node in the list
                 for (var i = 0; i < reminderList.length; i++) {
@@ -32,9 +37,31 @@ window.onload = function() {
 
                     //let the button be a child of the new reminder
                     newElement.appendChild(btn);
-                    var newString = reminderList[i].date.split("GMT");//add part of the timestamp to the reminder
-                    newElement.appendChild(document.createTextNode(" " + reminderList[i].msg + " - " + newString[0]));
+                    var newString = reminderList[i].expireDate.split("GMT");//add part of the timestamp to the reminder
+                    newElement.appendChild(document.createTextNode(" " + reminderList[i].msg + " [Expires @]: " + newString[0]));
                     document.getElementById("reminders").appendChild(newElement);
+                }
+
+                var btn2;
+                //for each reminder, create a new text node in the list
+                if(expiredList.length>0) {
+                    for (var i = 0; i < expiredList.length; i++) {
+                        var newElement = document.createElement("LI");
+
+                        //also create a new delete button, one for each reminder
+                        btn2 = document.createElement("BUTTON");
+
+                        btn2.appendChild(document.createTextNode('X'));
+
+                        //set the new button id = to the reminder's unique timestamp
+                        btn2.id = expiredList[i].date;
+
+                        //let the button be a child of the new expired reminder
+                        newElement.appendChild(btn2);
+                        var newString = expiredList[i].expireDate.split("GMT");//add part of the timestamp to the reminder
+                        newElement.appendChild(document.createTextNode(expiredList[i].msg + " [Expired @]: " + newString[0]));
+                        document.getElementById("expRems").appendChild(newElement);
+                    }
                 }
 
                 //set a click event listener for the reminder List
@@ -51,6 +78,27 @@ window.onload = function() {
                                 chrome.runtime.sendMessage({newList: reminderList, cmd:"delete"},
                                     function (response) {
                                         console.log("deleting ");
+                                    });
+
+                            }
+                        }
+                    }
+                });
+
+                //set a click event listener for the expired list
+                document.getElementById("expRems").addEventListener("click", function (e) {
+                    //if the target is one of the buttons, delete that child of the reminder List
+                    if (e.target && (e.target.nodeName == "BUTTON" || e.target.nodeName == "I")) {
+                        for(var i = 0; i < expiredList.length; i++){
+                            if(expiredList[i].date == e.target.id){
+                                //remove the selected reminder from the reminderList and update the storage and list
+                                expiredList.splice(i,1);
+                                document.getElementById("expRems").removeChild(document.getElementById("expRems").childNodes[i]);
+
+                                //tell the background script to update the storage with the modified list
+                                chrome.runtime.sendMessage({newExpiredList: expiredList, cmd:"deleteExp"},
+                                    function (response) {
+                                        console.log("deleting expired ");
                                     });
 
                             }
@@ -92,6 +140,8 @@ document.addEventListener('DOMContentLoaded', function() {
         //if the newReminder is not empty add it to the list of reminders
         if(newReminder != "" && expirationTime != "" && timeDifference < 0){
             console.log("sending message");
+            document.getElementById("reminder").value = "";
+            document.getElementById("expireTime").value = "";
 
             //send the reminder to the background
             chrome.runtime.sendMessage({msg: newReminder, date: timeStamp, expireDate: expDateStr, cmd: "normal"},
@@ -104,29 +154,52 @@ document.addEventListener('DOMContentLoaded', function() {
                 function(request, sender, sendResponse) {
                     if (request.cmd == "refresh") {
                         //now populate the list with all of the reminders
+                        console.log("refresh");
                         reminderList = request.allReminders.uniqKey;
+                        while (document.getElementById("reminders").firstChild) {
+                            document.getElementById("reminders").removeChild(document.getElementById("reminders").firstChild);
+                        }
+                        var btn;
+                        //for each reminder, create a new text node in the list
+
+                        for (var i = 0; i < reminderList.length; i++) {
+                            var newElement = document.createElement("LI");
+
+                            //also create a new delete button, one for each reminder
+                            btn = document.createElement("BUTTON");
+
+                            btn.appendChild(document.createTextNode('X'));
+
+                            //set the new button id = to the reminder's unique timestamp
+                            btn.id = reminderList[i].date;
+
+                            //let the button be a child of the new reminder
+                            newElement.appendChild(btn);
+                            var newString = reminderList[i].expireDate.split("GMT");//add part of the timestamp to the reminder
+                            newElement.appendChild(document.createTextNode(" " + reminderList[i].msg + " [Expires @]: " + newString[0]));
+                            document.getElementById("reminders").appendChild(newElement);
+                        }
                     }
                 });
 
 
-            //add a new reminder to the list, along with a corresponding delete button
-            var newElement = document.createElement("LI");
-            var btn = document.createElement("BUTTON");
-            btn.appendChild(document.createTextNode('X'));
-            btn.id = timeStamp;
-
-
-            newElement.appendChild(btn);
-            var newString = timeStamp.split("GMT");//add part of the timestamp to the reminder
-            newElement.appendChild(document.createTextNode(" " + newReminder + " - " + newString[0]));
-            document.getElementById("reminders").appendChild(newElement);
         }
     });
-
+    //event for clicking the reminder note textbox
     document.getElementById('reminder').addEventListener('click', function() {
         var textBox = document.getElementById('reminder');
         if(textBox.value == "Enter a Reminder:"){
             textBox.value = "";
         }
+    });
+    //event for clicking the dismiss all expired reminders button
+    document.getElementById('dismiss').addEventListener('click', function() {
+        chrome.runtime.sendMessage({cmd: "dismissAll"},
+            function (response) {
+                //clear the expired list
+                while (document.getElementById("expRems").firstChild) {
+                    document.getElementById("expRems").removeChild(document.getElementById("expRems").firstChild);
+                }
+            });
     });
 });
