@@ -21,7 +21,7 @@ Currently, the extension allows the user to create reminders that get stored loc
 
 ## Installation:
 	1. Download the Zip package from the Github Repository and extract the file to a pathway of your choosing
-	2. Go to the Chrome Extensions setting page [here](chrome://extensions/)
+	2. Go to the Chrome Extensions setting page: "chrome://extensions/"
 	3. Turn on Developer Mode
 	4. Click on the "Load Unpacked" button
 	5. Move down the pathway: "Reminder-Chrome-Extension/ChromeExt/src" and click Select
