@@ -24,7 +24,7 @@ Currently, the extension allows the user to create reminders that get stored loc
 	2. Go to the Chrome Extensions setting page: "chrome://extensions/"
 	3. Turn on Developer Mode
 	4. Click on the "Load Unpacked" button
-	5. Move down the pathway: "Reminder-Chrome-Extension/ChromeExt/src" and click Select
+	5. Move down the pathway from where you extracted the zip file: "/Reminder-Chrome-Extension/ChromeExt/src" and click Select
 
 	The Reminder Extension button should now be part of the browser
 
