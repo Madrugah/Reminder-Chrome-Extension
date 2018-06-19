@@ -1,4 +1,3 @@
-console.log("background running");
 var reminderArray = [];
 var expiredArray = [];
 
@@ -15,8 +14,6 @@ setInterval(function() {
         if(items.uniqKey2 != undefined){
             for (var i = 0; i < items.uniqKey2.length; i++) {//for each expired reminder push it into the expired array
                 expiredArray.push(items.uniqKey2[i]);
-                console.log("AFTER INIT:");
-                console.log(expiredArray);
             }
         }
 
@@ -55,10 +52,8 @@ setInterval(function() {
 
         //and update the storage for both
         chrome.storage.local.set({uniqKey2: expiredArray}, function () {
-
         });
         chrome.storage.local.set({uniqKey: reminderArray}, function () {
-
         });
 
         //send all of the reminders to the popup
@@ -71,8 +66,6 @@ setInterval(function() {
 //receive a message from the popup
 chrome.runtime.onMessage.addListener(
     function(request, sender, sendResponse) {
-        console.log("background.js got a message");
-        console.log(request);
 
         if (request.cmd == "handshake" && request.msg == "handshake") {
             //if the message is a handshake, then get all of the data and send it to the popup
@@ -87,8 +80,6 @@ chrome.runtime.onMessage.addListener(
                 if(items.uniqKey2 != undefined){
                     for (var i = 0; i < items.uniqKey2.length; i++) {//for each expired reminder push it into the expired array
                         expiredArray.push(items.uniqKey2[i]);
-                        console.log("AFTER INIT:");
-                        console.log(expiredArray);
                     }
                 }
 
@@ -140,8 +131,6 @@ chrome.runtime.onMessage.addListener(
             reminderArray = request.newList;
             //replace the array in storage with the new one
             chrome.storage.local.set({uniqKey: reminderArray}, function () {
-                console.log('ReminderArray is now: ');
-                console.log(reminderArray);
             });
         }
         if(request.cmd == "deleteExp"){
@@ -183,20 +172,16 @@ chrome.runtime.onMessage.addListener(
             }
 
             chrome.storage.local.set({uniqKey: reminderArray}, function () {
-                console.log('ReminderArray is now: ' + reminderArray);
             });
 
             reminderArray=[];
             chrome.storage.local.get(null, function (items) {
-                console.log(items.uniqKey);//items contains every single Key => value match
                 for(var i=0;i<items.uniqKey.length;i++){//for each reminder push it into the reminder array
-
                     reminderArray.push(items.uniqKey[i]);
                 }
 
                 chrome.runtime.sendMessage({allReminders: items,cmd: "refresh"}, function () {
                     //send all of the reminders and tell the popup to refresh
-                    console.log(reminderArray);
                 });
             });
         }

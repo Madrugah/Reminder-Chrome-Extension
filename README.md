@@ -1,5 +1,5 @@
 # Reminder Chrome Extension
-
+Developed by Quentin Madruga
 
 ## Purpose:
 A solo project meant to provide a better understanding of the Chrome Javascript api and its interaction with Chrome extensions and the chrome browser.
@@ -19,3 +19,14 @@ Currently, the extension allows the user to create reminders that get stored loc
 
 		Provided an understanding of how Chrome Extensions operate
 
+## Installation:
+	1. Download the Zip package from the Github Repository and extract the file to a pathway of your choosing
+	2. Go to the Chrome Extensions setting page [here](chrome://extensions/)
+	3. Turn on Developer Mode
+	4. Click on the "Load Unpacked" button
+	5. Move down the pathway: "Reminder-Chrome-Extension/ChromeExt/src" and click Select
+
+	The Reminder Extension button should now be part of the browser
+
+## Reflection:
+	Creating this Reminder Chrome Extension proved to be a great way of learning how to develop Chrome Extensions. The application uses communication between various components such as the background, content and popup scripts. The prior knowledge of networking protocols and REST api's made it easy to familiarize myself with the chrome.storage api and messaging system. Also prior knowledge of Document Object Model Manipulation with Javascript was beneficial in the listing and removing of the reminders. Overall, the creation of this extension was a good learning experience and a good introduction into creating Chrome Extensions.
